@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <h2>Todo View</h2>
-    <div v-if="loading">Loading...</div>
+    <div v-if="loading">Loading ...</div>
     <form v-if="!loading" @submit.prevent="onSave">
       <div class="row">
         <div class="col-6">
@@ -26,7 +26,6 @@
           </div>
         </div>
       </div>
-
       <button class="btn btn-primary" type="submit" :disabled="todoState">
         Save
       </button>
@@ -40,10 +39,11 @@
 
 <script>
 import { useRoute, useRouter } from "vue-router";
-import { computed, ref } from "vue";
+import { ref, computed } from "vue";
 import axios from "axios";
 import _ from "lodash";
 import ToastBox from "@/components/ToastBox.vue";
+import { useToast } from "@/composables/toast.js";
 
 export default {
   components: {
@@ -53,14 +53,44 @@ export default {
     const route = useRoute();
     const router = useRouter();
 
-    // 데이터 로딩 화면창 상태
+    // 생명 주기 코드(LifeCycle Hooks)
+    //  화면에 보여지기전(등록) 단계
+
+    // : 화면을 보여주기 전에 데이터를 준비하는 Hook
+    // onBeforeMount(() => {
+    //   console.log("onBeforeMount");
+    //   console.log(document.querySelector("#test"));
+    // });
+
+    // 화면에 보여지는 단계
+    // onMounted(() => {
+    //   console.log("onMounted");
+    //   console.log(document.querySelector("#test"));
+    // });
+    // 화면 갱신이 되기 전 단계
+    // onBeforeUpdate(() => {
+    //   console.log("onBeforeUpdate");
+    // });
+    // 화면 갱신이 되고 난 후
+    // onUpdated(() => {
+    //   console.log("onUpdated");
+    // });
+    // 컴포넌트가 화면에서 제거되기 전 준비 단계
+    // : 메모리를 정리 하는곳
+    // onBeforeUnmount(() => {
+    //   console.log("onBeforemount");
+    // });
+    // 컴포넌트가 완전히 제거 되었을 때
+    // onUnmounted(() => {
+    //   clearTimeout(toastTimer.value);
+    // });
+
+    // 데이터 로딩 화면상태
     const loading = ref(true);
     const todo = ref(null);
-
-    // 원본 데이터 보과 및 비교용(Todo 객체)
+    // 원본데이터 보관 및 비교(todo 객체)용
     const originalTodo = ref(null);
-
-    // 전달받은 id를 이용해서 db에서 자료를 가져온다.
+    // 전달받은 id 를 이용해서 db 에서 자료를 가져온다.
     const getTodo = async () => {
       try {
         const response = await axios.get(
@@ -82,13 +112,11 @@ export default {
     const toggleTodoState = () => {
       todo.value.complete = !todo.value.complete;
     };
-
     const moveList = () => {
       router.push({
         name: "Todos",
       });
     };
-
     const onSave = async () => {
       try {
         const res = await axios.put(
@@ -102,31 +130,30 @@ export default {
         triggerToast("업데이트가 성공하였습니다.");
       } catch (err) {
         triggerToast(
-          "서버에러가 발생하였습니다. 잠시 뒤 다시 저장해주세요.",
+          "서버에러가 발생하였습니다. 잠시 후 다시 시도 해 주세요.",
           "danger"
         );
       }
     };
-
     const todoState = computed(() => {
       return _.isEqual(todo.value, originalTodo.value);
     });
 
     // 안내창 관련
-    const toastMessage = ref("");
-    const toastType = ref("");
-    const showToast = ref(false);
+    const { showToast, toastMessage, toastType } = useToast();
+
+    const toastTimer = ref(null);
     const triggerToast = (message, color = "success") => {
       toastMessage.value = message;
       toastType.value = color;
       showToast.value = true;
-      setTimeout(() => {
+      toastTimer.value = setTimeout(() => {
         toastMessage.value = "";
         toastType.value = "";
         showToast.value = false;
+        console.log("안내창 제거");
       }, 3000);
     };
-
     return {
       todo,
       loading,

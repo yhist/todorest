@@ -22,6 +22,8 @@
     />
     <!-- Pagination -->
     <PaginationView :page="page" :totalpage="totalPage" @get-todo="getTodo" />
+    <!-- 안내상자 -->
+    <ToastBox v-if="showToast" :message="toastMessage" :color="toastType" />
   </div>
 </template>
 
@@ -32,12 +34,16 @@ import TodoForm from "@/components/TodoSimpleForm.vue";
 import TodoList from "@/components/TodoList.vue";
 import PaginationView from "@/components/PaginationView.vue";
 import ErrorBox from "@/components/ErrorBox.vue";
+import ToastBox from "@/components/ToastBox.vue";
+import { useToast } from "@/composables/toast.js";
+
 export default {
   components: {
     TodoForm,
     TodoList,
     PaginationView,
     ErrorBox,
+    ToastBox,
   },
   setup() {
     const todos = ref([]);
@@ -47,9 +53,9 @@ export default {
     const totalCout = ref(0);
     // 페이지당 보여줄 개수
     const limit = 5;
-    // 현재페이지
+    // 현재 페이지
     const page = ref(1);
-    // 총페이지수
+    // 총 페이지수
     const totalPage = computed(() => {
       return Math.ceil(totalCout.value / limit);
     });
@@ -66,20 +72,17 @@ export default {
     });
 
     // 변하기 전의 값 과 현재 값을 동시에 감시한다.
-    // 연속으로 검색으럴 무수하게 보내는 부분 일정
+    // 연속으로 검색어를 무수하게 보내는 부분을 일정주기마다 감시한다.
     let timeout = null;
 
     watch(searchText, () => {
-      // 일정한 시간이 지나고 난 후 한번만 실한한다.
+      // 검색 기능은 추후 보완할 예정
       // 타이머를 없앤다.
       clearTimeout(timeout);
-      // 그리고 다시 타이머를 생성한다.
+      // 그리고 다시 타이머를 생성
       timeout = setTimeout(() => {
         getTodo(1);
-      }, 2000);
-
-      // 검색 기능은 추후 보완할 예정
-      // getTodo(1);
+      }, 500);
     });
 
     const filterTodos = computed(() => {
@@ -100,8 +103,13 @@ export default {
         // 총 목록수
         totalCout.value = response.headers["x-total-count"];
         page.value = nowPage;
+        triggerToast("목록이 출력되었습니다.");
       } catch (err) {
         error.value = "서버 목록 호출에 실패했습니다. 잠시 뒤 이용해주세요.";
+        triggerToast(
+          "서버 목록 호출에 실패했습니다. 잠시 뒤 이용해주세요.",
+          "danger"
+        );
       }
     };
 
@@ -118,8 +126,10 @@ export default {
         todos.value.push(todo);
         // 목록이 추가되면 1페이지로 이동
         getTodo(1);
+        triggerToast("목록이 저장되었습니다.");
       } catch (err) {
         error.value = "서버 데이터 저장 실패";
+        triggerToast("서버 데이터 저장 실패", "danger");
       }
     };
 
@@ -132,8 +142,10 @@ export default {
         todos.value.splice(index, 1);
         // 목록이 추가되면 1페이지로 이동
         getTodo(page.value);
+        triggerToast("목록이 삭제되었습니다.");
       } catch (err) {
         error.value = "삭제 요청이 거부되었습니다.";
+        triggerToast("삭제 요청이 거부되었습니다.", "danger");
       }
     };
 
@@ -146,11 +158,28 @@ export default {
         await axios.patch("http://localhost:3000/todos/" + id, {
           complete,
         });
-
         todos.value[index].complete = complete;
+        triggerToast("업데이트에 성공하였습니다.");
       } catch (err) {
         error.value = "업데이트에 실패하였습니다.";
+        triggerToast("업데이트에 실패하였습니다.", "danger");
       }
+    };
+
+    // 안내창 관련
+    const { showToast, toastMessage, toastType } = useToast();
+
+    const toastTimer = ref(null);
+    const triggerToast = (message, color = "success") => {
+      toastMessage.value = message;
+      toastType.value = color;
+      showToast.value = true;
+      toastTimer.value = setTimeout(() => {
+        toastMessage.value = "";
+        toastType.value = "";
+        showToast.value = false;
+        console.log("안내창 제거");
+      }, 3000);
     };
 
     return {
@@ -164,6 +193,9 @@ export default {
       totalPage,
       page,
       getTodo,
+      toastMessage,
+      showToast,
+      toastType,
     };
   },
 };
