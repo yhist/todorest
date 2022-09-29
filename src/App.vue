@@ -31,9 +31,24 @@
             >
           </li>
           <li class="nav-item">
+            <RouterLink class="nav-link" :to="{ name: 'TodoCreate' }"
+              >Todo Create</RouterLink
+            >
+          </li>
+          <li class="nav-item">
+            <RouterLink class="nav-link" :to="{ name: 'About' }"
+              >About</RouterLink
+            >
+          </li>
+          <li class="nav-item">
+            <RouterLink class="nav-link" :to="{ name: 'Profile' }"
+              >Profile</RouterLink
+            >
+          </li>
+          <li class="nav-item">
             <a
               class="nav-link"
-              href="http://github.com/dkssudgktpd/todorest"
+              href="https://github.com/yhist/todorest"
               target="_blank"
               >Github</a
             >
