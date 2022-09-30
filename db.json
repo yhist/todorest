@@ -106,22 +106,10 @@
       "id": 1664241230811
     },
     {
-      "subject": "18",
-      "complete": false,
-      "body": "",
-      "id": 1664241230812
-    },
-    {
       "subject": "19",
-      "complete": false,
+      "complete": true,
       "body": "",
       "id": 1664241230813
-    },
-    {
-      "subject": "20",
-      "complete": false,
-      "body": "",
-      "id": 1664241230814
     },
     {
       "subject": "21",
@@ -167,33 +155,15 @@
     },
     {
       "subject": "28",
-      "complete": false,
+      "complete": true,
       "body": "",
       "id": 1664241230822
-    },
-    {
-      "subject": "29",
-      "complete": false,
-      "body": "",
-      "id": 1664241230823
     },
     {
       "subject": "30",
       "complete": false,
       "body": "",
       "id": 1664241230824
-    },
-    {
-      "subject": "새글등록ㅇㅇㅇ",
-      "complete": true,
-      "body": "",
-      "id": 1664241230825
-    },
-    {
-      "subject": "ㅇㅇㅇ",
-      "complete": true,
-      "body": "",
-      "id": 1664241230826
     },
     {
       "subject": "ㅇㅇㅇㅇㅇㅇ",
