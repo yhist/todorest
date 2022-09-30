@@ -1,11 +1,12 @@
 <template>
   <div class="container">
-    <div class="d-flex justify-content-between mt-3 mb-3">
+    <div class="d-flex justify-content-between mb-3 mt-3">
       <h2>Todo List</h2>
       <button class="btn btn-primary btn-sm" @click="moveToCreate">
-        Creat Todo
+        Create Todo
       </button>
     </div>
+
     <!-- 할일검색폼 -->
     <input
       class="form-control"
@@ -26,8 +27,6 @@
     />
     <!-- Pagination -->
     <PaginationView :page="page" :totalpage="totalPage" @get-todo="getTodo" />
-    <!-- 안내상자 -->
-    <ToastBox v-if="showToast" :message="toastMessage" :color="toastType" />
   </div>
 </template>
 
@@ -37,8 +36,7 @@ import { computed, ref, watch, watchEffect } from "vue";
 import TodoList from "@/components/TodoList.vue";
 import PaginationView from "@/components/PaginationView.vue";
 import ErrorBox from "@/components/ErrorBox.vue";
-import ToastBox from "@/components/ToastBox.vue";
-import { useToast } from "@/composables/toast.js";
+
 import { useRouter } from "vue-router";
 
 export default {
@@ -46,9 +44,15 @@ export default {
     TodoList,
     PaginationView,
     ErrorBox,
-    ToastBox,
   },
-  setup() {
+  emits: [
+    "list-load-fail-toast",
+    "delete-todo-toast",
+    "delete-todo-fail-toast",
+    "update-todo-toast",
+    "update-todo-fail-toast",
+  ],
+  setup(props, { emit }) {
     const todos = ref([]);
 
     // Pagination 구현
@@ -56,9 +60,9 @@ export default {
     const totalCout = ref(0);
     // 페이지당 보여줄 개수
     const limit = 5;
-    // 현재 페이지
+    // 현재페이지
     const page = ref(1);
-    // 총 페이지수
+    // 총페이지수
     const totalPage = computed(() => {
       return Math.ceil(totalCout.value / limit);
     });
@@ -75,17 +79,17 @@ export default {
     });
 
     // 변하기 전의 값 과 현재 값을 동시에 감시한다.
-    // 연속으로 검색어를 무수하게 보내는 부분을 일정주기마다 감시한다.
+    // 연속으로 검색어를 무수하게 보내는 부분 일정수정
     let timeout = null;
 
     watch(searchText, () => {
-      // 검색 기능은 추후 보완할 예정
+      // 일정한 시간이 지나고 난 다음에 1번만 실행한다
       // 타이머를 없앤다.
       clearTimeout(timeout);
-      // 그리고 다시 타이머를 생성
+      // 그리고 다시 타이머를 생성한다.
       timeout = setTimeout(() => {
         getTodo(1);
-      }, 500);
+      }, 2000);
     });
 
     const filterTodos = computed(() => {
@@ -106,35 +110,16 @@ export default {
         // 총 목록수
         totalCout.value = response.headers["x-total-count"];
         page.value = nowPage;
-        // triggerToast("목록이 출력되었습니다.");
       } catch (err) {
         error.value = "서버 목록 호출에 실패했습니다. 잠시 뒤 이용해주세요.";
-        triggerToast(
-          "서버 목록 호출에 실패했습니다. 잠시 뒤 이용해주세요.",
-          "danger"
-        );
+
+        emit("list-load-fail-toast", {});
       }
     };
 
     getTodo();
 
     const error = ref("");
-    const addTodo = async (todo) => {
-      try {
-        await axios.post("http://localhost:3000/todos", {
-          id: todo.id,
-          subject: todo.subject,
-          complete: todo.complete,
-        });
-        todos.value.push(todo);
-        // 목록이 추가되면 1페이지로 이동
-        getTodo(1);
-        triggerToast("목록이 저장되었습니다.");
-      } catch (err) {
-        error.value = "서버 데이터 저장 실패";
-        triggerToast("서버 데이터 저장 실패", "danger");
-      }
-    };
 
     const deleteTodo = async (index) => {
       try {
@@ -145,10 +130,10 @@ export default {
         todos.value.splice(index, 1);
         // 목록이 추가되면 1페이지로 이동
         getTodo(page.value);
-        triggerToast("목록이 삭제되었습니다.");
+        emit("delete-todo-toast");
       } catch (err) {
         error.value = "삭제 요청이 거부되었습니다.";
-        triggerToast("삭제 요청이 거부되었습니다.", "danger");
+        emit("delete-todo-fail-toast");
       }
     };
 
@@ -161,28 +146,13 @@ export default {
         await axios.patch("http://localhost:3000/todos/" + id, {
           complete,
         });
+
         todos.value[index].complete = complete;
-        triggerToast("업데이트에 성공하였습니다.");
+        emit("update-todo-toast");
       } catch (err) {
         error.value = "업데이트에 실패하였습니다.";
-        triggerToast("업데이트에 실패하였습니다.", "danger");
+        emit("update-todo-fail-toast");
       }
-    };
-
-    // 안내창 관련
-    const { showToast, toastMessage, toastType } = useToast();
-
-    const toastTimer = ref(null);
-    const triggerToast = (message, color = "success") => {
-      toastMessage.value = message;
-      toastType.value = color;
-      showToast.value = true;
-      toastTimer.value = setTimeout(() => {
-        toastMessage.value = "";
-        toastType.value = "";
-        showToast.value = false;
-        console.log("안내창 제거");
-      }, 3000);
     };
 
     const router = useRouter();
@@ -194,7 +164,6 @@ export default {
 
     return {
       todos,
-      addTodo,
       deleteTodo,
       toggleTodo,
       searchText,
@@ -203,9 +172,7 @@ export default {
       totalPage,
       page,
       getTodo,
-      toastMessage,
-      showToast,
-      toastType,
+
       moveToCreate,
     };
   },
