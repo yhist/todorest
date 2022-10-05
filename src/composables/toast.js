@@ -17,7 +17,7 @@ export const useToast = () => {
       toastMessage.value = "";
       toastType.value = "";
       showToast.value = false;
-      console.log("안내창 제거");
+      // console.log("안내창 제거");
     }, 3000);
   };
 

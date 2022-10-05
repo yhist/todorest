@@ -149,7 +149,7 @@
     },
     {
       "subject": "27",
-      "complete": false,
+      "complete": true,
       "body": "",
       "id": 1664241230821
     },
@@ -164,12 +164,6 @@
       "complete": false,
       "body": "",
       "id": 1664241230824
-    },
-    {
-      "subject": "ㅇㅇㅇㅇㅇㅇ",
-      "complete": true,
-      "body": "ㅇㅇ",
-      "id": 1664241230827
     }
   ]
 }
