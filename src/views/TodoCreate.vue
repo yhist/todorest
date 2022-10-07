@@ -1,11 +1,7 @@
 <template>
   <div class="container">
     <h1>TodoCreate</h1>
-    <TodoForm
-      @new-todo="newTodo"
-      @new-todo-fail="newTodoFail"
-      @err-subject="errSubject"
-    />
+    <TodoForm />
   </div>
 </template>
 
@@ -14,22 +10,22 @@ import TodoForm from "@/components/TodoForm.vue";
 
 export default {
   components: { TodoForm },
-  emits: ["new-todo-toast", "new-todo-fail-toast", "err-subject-toast"],
-  setup(props, { emit }) {
-    const newTodo = () => {
-      emit("new-todo-toast", {});
-    };
-    const newTodoFail = () => {
-      emit("new-todo-fail-toast", {});
-    };
-    const errSubject = () => {
-      emit("err-subject-toast", {});
-    };
+  // emits: ["new-todo-toast", "new-todo-fail-toast", "err-subject-toast"],
+  setup() {
+    // const newTodo = () => {
+    //   emit("new-todo-toast", {});
+    // };
+    // const newTodoFail = () => {
+    //   emit("new-todo-fail-toast", {});
+    // };
+    // const errSubject = () => {
+    //   emit("err-subject-toast", {});
+    // };
 
     return {
-      newTodo,
-      newTodoFail,
-      errSubject,
+      // newTodo,
+      // newTodoFail,
+      // errSubject,
     };
   },
 };

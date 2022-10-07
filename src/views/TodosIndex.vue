@@ -36,8 +36,8 @@ import { computed, ref, watch, watchEffect } from "vue";
 import TodoList from "@/components/TodoList.vue";
 import PaginationView from "@/components/PaginationView.vue";
 import ErrorBox from "@/components/ErrorBox.vue";
-
 import { useRouter } from "vue-router";
+import { useToast } from "@/composables/toast";
 
 export default {
   components: {
@@ -45,14 +45,10 @@ export default {
     PaginationView,
     ErrorBox,
   },
-  emits: [
-    "list-load-fail-toast",
-    "delete-todo-toast",
-    "delete-todo-fail-toast",
-    "update-todo-toast",
-    "update-todo-fail-toast",
-  ],
-  setup(props, { emit }) {
+  setup() {
+    // toast 기능 관련
+    const { triggerToast } = useToast();
+
     const todos = ref([]);
 
     // Pagination 구현
@@ -112,8 +108,6 @@ export default {
         page.value = nowPage;
       } catch (err) {
         error.value = "서버 목록 호출에 실패했습니다. 잠시 뒤 이용해주세요.";
-
-        emit("list-load-fail-toast", {});
       }
     };
 
@@ -123,19 +117,17 @@ export default {
 
     const deleteTodo = async (index) => {
       try {
-        // 현재 index 는 배열 인덱스 번호 0, 1,2,3,4, 가 전송된다.
-        // 실제 저장되어 있는 id 를 파악한다.
         const id = index;
-        // const id = todos.value[index].id;
         await axios.delete("todos/" + id);
-        // todos.value.splice(index, 1);
-        // 목록이 추가되면 1페이지로 이동
-        // 목록이 삭제 되면 현제 페이지로 이동
+
+        // 목록이 삭제 되면 현재페이지로 이동
         getTodo(page.value);
-        emit("delete-todo-toast");
+        // emit("delete-todo-toast");
+        triggerToast("내용이 삭제되었습니다.", "success");
       } catch (err) {
         error.value = "삭제 요청이 거부되었습니다.";
-        emit("delete-todo-fail-toast");
+        // emit("delete-todo-fail-toast");
+        triggerToast("삭제 요청이 거부되었습니다.", "danger");
       }
     };
 
@@ -150,10 +142,12 @@ export default {
         });
 
         todos.value[index].complete = complete;
-        emit("update-todo-toast");
+        // emit("update-todo-toast");
+        triggerToast("내용이 업데이트 되었습니다.", "success");
       } catch (err) {
         error.value = "업데이트에 실패하였습니다.";
-        emit("update-todo-fail-toast");
+        // emit("update-todo-fail-toast");
+        triggerToast("업데이트에 실패하였습니다.", "danger");
       }
     };
 

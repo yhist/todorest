@@ -13,7 +13,7 @@
         >Profile</RouterLink
       >
       <a
-        class="nav-link"
+        class="nav-link disabled"
         href="https://github.com/tarolong2/todorest"
         target="_blank"
         >Github</a
