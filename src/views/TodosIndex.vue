@@ -38,6 +38,7 @@ import PaginationView from "@/components/PaginationView.vue";
 import ErrorBox from "@/components/ErrorBox.vue";
 import { useRouter } from "vue-router";
 import { useToast } from "@/composables/toast";
+import { useStore } from "vuex";
 
 export default {
   components: {
@@ -157,6 +158,13 @@ export default {
         name: "TodoCreate",
       });
     };
+
+    const store = useStore();
+    const loginState = computed(() => store.getters["kakao/getLoginState"]);
+    if (!loginState.value) {
+      alert("로그인을 하세요");
+      router.push({ name: "Home" });
+    }
 
     return {
       todos,

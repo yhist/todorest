@@ -14,16 +14,21 @@
       >
       <a
         class="nav-link disabled"
-        href="https://github.com/tarolong2/todorest"
+        href="https://github.com/yhist/todorest"
         target="_blank"
         >Github</a
       >
+      <KakaoLogin />
     </div>
   </nav>
 </template>
 
 <script>
-export default {};
+import KakaoLogin from "@/views/KakaoLogin.vue";
+export default {
+  components: { KakaoLogin },
+  setup() {},
+};
 </script>
 
 <style></style>
